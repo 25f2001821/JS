@@ -1,597 +1,867 @@
-
 /*
-============================================================
-JAVASCRIPT DOM — COMPLETE REVISION NOTES
-============================================================
+===============================================================================
+JAVASCRIPT DOM — COMPLETE REVISION FILE
+Based on JS6 ClassNotes.pdf + important additional concepts
+===============================================================================
 
-DOM = Document Object Model
+HOW TO USE THIS FILE
+--------------------
+1. Save this file as: dom.js
+2. Create an index.html file and include:
+      <script src="dom.js" defer></script>
+3. Add the HTML elements shown in each section before testing that section.
+4. Open index.html in a browser. Use F12 -> Console to inspect output.
 
-The browser represents HTML as objects that JavaScript can
-access and manipulate.
+IMPORTANT
+---------
+- DOM means Document Object Model: the browser's object-based representation
+  of an HTML page.
+- DOM APIs such as document.getElementById() require a browser. They do not
+  normally work when you run this file directly with Node.js.
+- Most examples below are commented out or guarded so that missing HTML
+  elements do not crash the whole file. Uncomment the section you are studying.
 
-HTML  -> Structure
-CSS   -> Styling
-JS    -> Behavior and interaction
-
-Prerequisite:
-Link this file to HTML using:
-
-<script src="dom_revision.js" defer></script>
-
-Open the HTML file in a browser and inspect the Console.
+THE 3 MUSKETEERS OF WEB DEVELOPMENT
+-----------------------------------
+HTML = structure
+CSS  = styling
+JS   = logic and interaction
+===============================================================================
 */
 
 
-// ============================================================
-// 1. SELECTING HTML ELEMENTS
-// ============================================================
+// ============================================================================
+// 1. WINDOW OBJECT AND DOCUMENT OBJECT
+// ============================================================================
 
-// HTML examples:
-// <h1 id="title">Hello World</h1>
-// <p class="message">First paragraph</p>
-// <p class="message">Second paragraph</p>
-// <button id="btn">Click Me</button>
+/*
+window represents the browser window/tab and provides browser-related
+properties and methods. In a browser, it is the global object.
 
-const title = document.getElementById("title");
+document represents the currently loaded HTML document and is available
+through window.document.
 
-console.log(title);
+Examples:
+*/
 
-// Select the first matching CSS selector
-const heading = document.querySelector("#title");
+console.log("Browser window:", window);
+console.log("HTML document:", document);
+console.log("Page title:", document.title);
+console.log("Current URL:", window.location.href);
+
+// window.alert("Hello!"); // Opens a browser alert. Uncomment to test.
+// console.log(window.innerWidth);  // Browser viewport width
+// console.log(window.innerHeight); // Browser viewport height
+
+
+// ============================================================================
+// 2. WHAT IS THE DOM?
+// ============================================================================
+
+/*
+When a web page loads, the browser parses its HTML and creates a DOM tree.
+
+A simplified tree:
+
+window
+└── document
+    └── html
+        ├── head
+        │   ├── meta
+        │   └── title
+        └── body
+            ├── h1
+            ├── p
+            └── button
+
+JavaScript can select nodes in this tree, read their content, change their
+styles/attributes, create new elements, remove elements, and respond to events.
+*/
+
+
+// ============================================================================
+// 3. SELECTING ELEMENTS
+// ============================================================================
+
+/*
+Suppose the HTML contains:
+
+<h1 id="title">Hello JavaScript</h1>
+<p class="message">First paragraph</p>
+<p class="message">Second paragraph</p>
+<button id="myButton">Click me</button>
+*/
+
+// A) Select by ID: returns one element or null.
+const titleById = document.getElementById("title");
+console.log("Selected by ID:", titleById);
+
+// B) Select by class: returns a live HTMLCollection.
+const messagesByClass = document.getElementsByClassName("message");
+console.log("Selected by class:", messagesByClass);
+
+// C) Select by tag name: returns a live HTMLCollection.
+const paragraphsByTag = document.getElementsByTagName("p");
+console.log("Selected by tag:", paragraphsByTag);
+
+// D) querySelector: returns the FIRST matching element or null.
+const titleByQuery = document.querySelector("#title");
 const firstMessage = document.querySelector(".message");
-const button = document.querySelector("#btn");
+const firstParagraph = document.querySelector("p");
 
-// Select all matching elements
-const messages = document.querySelectorAll(".message");
-
-console.log(heading);
-console.log(firstMessage);
-console.log(button);
-console.log(messages);
-
-// CSS selector reminders:
-// "#title"    -> ID
-// ".message" -> Class
-// "p"         -> HTML tag
-
-
-// ============================================================
-// 2. READING AND CHANGING TEXT
-// ============================================================
-
-// HTML:
-// <h1 id="title">Hello World</h1>
-
-if (title) {
-    // Read text
-    console.log(title.textContent);
-
-    // Change text
-    // Uncomment to test:
-    // title.textContent = "Hello JavaScript!";
-}
-
-
-// ============================================================
-// 3. textContent vs innerHTML
-// ============================================================
+// E) querySelectorAll: returns a static NodeList of all matching elements.
+const allMessages = document.querySelectorAll(".message");
+console.log("All matching messages:", allMessages);
 
 /*
-textContent treats the content as text.
-innerHTML interprets strings as HTML.
+CSS selector reminders:
+"#title"    -> element with id="title"
+".message"  -> elements with class="message"
+"p"         -> paragraph elements
+"div.box"   -> div elements with class="box"
+"input[type='text']" -> text input elements
 
-Prefer textContent for ordinary text and untrusted input.
-Using untrusted data with innerHTML can cause XSS.
-*/
-
-if (title) {
-    // Safe text insertion:
-    // title.textContent = "<b>Hello</b>";
-
-    // HTML interpretation:
-    // title.innerHTML = "<b>Hello</b>";
-}
-
-
-// ============================================================
-// 4. CHANGING CSS
-// ============================================================
-
-// HTML:
-// <h1 id="title">Hello</h1>
-
-if (title) {
-    // Uncomment to test:
-    // title.style.color = "blue";
-    // title.style.backgroundColor = "lightyellow";
-    // title.style.fontSize = "40px";
-    // title.style.textAlign = "center";
-}
-
-
-// ============================================================
-// 5. classList
-// ============================================================
-
-// CSS:
-// .highlight {
-//     color: blue;
-//     background-color: lightyellow;
-// }
-
-// HTML:
-// <h1 id="title">Hello</h1>
-
-if (title) {
-    // title.classList.add("highlight");
-    // title.classList.remove("highlight");
-    // title.classList.toggle("highlight");
-
-    console.log(title.classList.contains("highlight"));
-}
-
-
-// ============================================================
-// 6. CLICK EVENTS
-// ============================================================
-
-// HTML:
-// <h1 id="title">Hello World</h1>
-// <button id="btn">Change Text</button>
-
-if (title && button) {
-    button.addEventListener("click", function () {
-        title.textContent = "You clicked the button!";
-    });
-}
-
-/*
-addEventListener(event, callback)
-
-"click" -> runs the callback when the element is clicked.
-
-The callback function runs later, when the event happens.
+Key difference:
+- querySelector() returns the first match.
+- querySelectorAll() returns all matches in a NodeList.
+- getElementsByClassName() / getElementsByTagName() return live collections.
+- getElementById() takes the ID WITHOUT the # symbol.
 */
 
 
-// ============================================================
-// 7. ARROW FUNCTION EVENT HANDLER
-// ============================================================
+// ============================================================================
+// 4. LOOPING THROUGH SELECTED ELEMENTS
+// ============================================================================
 
-// const btn = document.getElementById("btn");
+// If the page contains several elements with class="message":
+allMessages.forEach((element, index) => {
+    console.log(`Message ${index + 1}:`, element.textContent);
+});
 
-// if (btn) {
-//     btn.addEventListener("click", () => {
-//         console.log("Button clicked!");
+// Example: style all elements matching .message
+// document.querySelectorAll(".message").forEach((element) => {
+//     element.style.color = "blue";
+// });
+
+
+// ============================================================================
+// 5. READING AND CHANGING CONTENT
+// ============================================================================
+
+/*
+HTML:
+<div id="demo">
+    Hello <strong>JavaScript</strong>
+</div>
+
+- innerText: rendered, human-readable text; affected by CSS visibility/layout.
+- textContent: text from the node and its descendants, including hidden text.
+- innerHTML: HTML markup inside the element; can read or parse markup.
+- tagName: uppercase tag name for an HTML element, e.g. "DIV".
+*/
+
+const demo = document.getElementById("demo");
+
+if (demo) {
+    console.log("tagName:", demo.tagName);
+    console.log("innerText:", demo.innerText);
+    console.log("textContent:", demo.textContent);
+    console.log("innerHTML:", demo.innerHTML);
+
+    // Change all content to plain text:
+    // demo.textContent = "New text";
+
+    // Parse the supplied string as HTML:
+    // demo.innerHTML = "<strong>Bold text</strong>";
+}
+
+/*
+SECURITY RULE:
+Prefer textContent for ordinary text, especially text supplied by users.
+Putting untrusted content into innerHTML can create cross-site scripting
+(XSS) vulnerabilities.
+
+innerText, textContent and innerHTML are not interchangeable:
+- textContent -> text
+- innerText   -> rendered text
+- innerHTML   -> markup inside the element
+*/
+
+
+// ============================================================================
+// 6. PDF PRACTICE: CREATE AN H2 AND APPEND TEXT
+// ============================================================================
+
+/*
+Task from the PDF:
+Create an h2 heading with text "Hello JavaScript".
+Append " from Apna College students" using JavaScript.
+
+HTML:
+<div id="practiceArea"></div>
+
+Solution:
+*/
+
+const practiceArea = document.getElementById("practiceArea");
+
+if (practiceArea) {
+    const h2 = document.createElement("h2");
+    h2.textContent = "Hello JavaScript";
+    h2.textContent += " from Apna College students";
+    practiceArea.append(h2);
+}
+
+/*
+The same result could be written as:
+h2.textContent = "Hello JavaScript from Apna College students";
+
+The += example demonstrates appending to the existing text.
+*/
+
+
+// ============================================================================
+// 7. PDF PRACTICE: THREE DIVS WITH THE SAME CLASS, UNIQUE TEXT
+// ============================================================================
+
+/*
+Task from the PDF:
+Create/access three divs with common class "box" and give each unique text.
+
+HTML option:
+<div class="box"></div>
+<div class="box"></div>
+<div class="box"></div>
+*/
+
+const boxes = document.querySelectorAll(".box");
+const boxTexts = ["First box", "Second box", "Third box"];
+
+boxes.forEach((box, index) => {
+    if (boxTexts[index] !== undefined) {
+        box.textContent = boxTexts[index];
+    }
+});
+
+// To create three boxes from JavaScript instead, use this pattern:
+// const boxContainer = document.getElementById("boxContainer");
+// if (boxContainer) {
+//     ["First box", "Second box", "Third box"].forEach((text) => {
+//         const box = document.createElement("div");
+//         box.classList.add("box");
+//         box.textContent = text;
+//         boxContainer.append(box);
 //     });
 // }
 
 
-// ============================================================
-// 8. MOUSE EVENTS
-// ============================================================
+// ============================================================================
+// 8. ATTRIBUTES: getAttribute(), setAttribute(), hasAttribute()
+// ============================================================================
 
-// HTML:
-// <p id="message">Move your mouse over me.</p>
+/*
+HTML:
+<a id="myLink" href="https://example.com">Visit site</a>
+<img id="profileImage" src="old.jpg" alt="Profile image">
+*/
 
-const message = document.getElementById("message");
+const myLink = document.getElementById("myLink");
 
-if (message) {
-    message.addEventListener("mouseover", function () {
-        message.style.color = "red";
-    });
+if (myLink) {
+    // Read an attribute:
+    console.log("href:", myLink.getAttribute("href"));
 
-    message.addEventListener("mouseout", function () {
-        message.style.color = "black";
-    });
+    // Set/change an attribute:
+    // myLink.setAttribute("href", "https://developer.mozilla.org/");
+
+    // Check whether an attribute exists:
+    console.log("Has href?", myLink.hasAttribute("href"));
+
+    // Remove an attribute:
+    // myLink.removeAttribute("target");
 }
 
+const profileImage = document.getElementById("profileImage");
 
-// ============================================================
-// 9. INPUT FIELDS
-// ============================================================
+if (profileImage) {
+    // profileImage.setAttribute("src", "new-image.jpg");
+    // profileImage.setAttribute("alt", "Updated profile image");
+}
 
-// HTML:
-// <input id="username" type="text">
-// <button id="greetBtn">Greet</button>
-// <p id="output"></p>
+/*
+Some common attributes:
+href, src, alt, id, class, title, type, value, disabled
 
-const usernameInput = document.getElementById("username");
-const greetBtn = document.getElementById("greetBtn");
-const output = document.getElementById("output");
+For many form controls, properties such as input.value and input.checked are
+convenient for reading the current state. getAttribute("value") may reflect
+the original HTML attribute rather than the current typed value.
+*/
 
-if (usernameInput && greetBtn && output) {
-    greetBtn.addEventListener("click", function () {
-        const username = usernameInput.value;
 
-        output.textContent = `Hello, ${username}!`;
+// ============================================================================
+// 9. INLINE STYLING WITH element.style
+// ============================================================================
+
+/*
+HTML:
+<p id="styledParagraph">Style me</p>
+*/
+
+const styledParagraph = document.getElementById("styledParagraph");
+
+if (styledParagraph) {
+    // Uncomment to test:
+    // styledParagraph.style.color = "white";
+    // styledParagraph.style.backgroundColor = "crimson";
+    // styledParagraph.style.fontSize = "20px";
+    // styledParagraph.style.padding = "10px";
+    // styledParagraph.style.borderRadius = "8px";
+}
+
+/*
+CSS uses kebab-case:
+    background-color
+JavaScript style properties use camelCase:
+    backgroundColor
+
+element.style primarily reads/writes inline styles. For larger designs,
+prefer CSS classes rather than setting many inline styles.
+*/
+
+
+// ============================================================================
+// 10. className VS classList
+// ============================================================================
+
+/*
+HTML:
+<p id="classDemo" class="paragraph">Class practice</p>
+
+CSS:
+.highlight {
+    color: blue;
+    background-color: lightyellow;
+}
+.large-text {
+    font-size: 24px;
+}
+*/
+
+const classDemo = document.getElementById("classDemo");
+
+if (classDemo) {
+    // This REPLACES the entire class attribute:
+    // classDemo.className = "highlight";
+
+    // classList lets you add/remove classes without replacing other classes:
+    // classDemo.classList.add("highlight");
+    // classDemo.classList.add("large-text");
+    // classDemo.classList.remove("highlight");
+    // classDemo.classList.toggle("highlight");
+    // console.log(classDemo.classList.contains("large-text"));
+}
+
+/*
+PDF practice: avoid overwriting the old class.
+Use classList.add("new-class") to add a class while preserving existing ones.
+*/
+
+
+// ============================================================================
+// 11. CREATING, INSERTING AND REMOVING ELEMENTS
+// ============================================================================
+
+/*
+The PDF introduces:
+document.createElement("div")
+node.append(element)   -> inside, at the end
+node.prepend(element)  -> inside, at the start
+node.before(element)   -> outside, before node
+node.after(element)    -> outside, after node
+node.remove()          -> remove node
+
+HTML:
+<div id="insertTarget"><p id="existingChild">Existing child</p></div>
+*/
+
+const insertTarget = document.getElementById("insertTarget");
+
+if (insertTarget) {
+    const newDiv = document.createElement("div");
+    newDiv.textContent = "I was created with JavaScript";
+
+    // Uncomment ONE insertion method at a time to see the difference:
+    // insertTarget.append(newDiv);
+    // insertTarget.prepend(newDiv);
+
+    // To insert relative to the target element:
+    // insertTarget.before(newDiv);
+    // insertTarget.after(newDiv);
+
+    // To remove an element:
+    // newDiv.remove();
+}
+
+/*
+append() accepts text and multiple nodes:
+container.append("Hello ", anotherElement)
+
+appendChild() also works, but accepts a Node and returns the appended node:
+container.appendChild(anotherElement)
+*/
+
+
+// ============================================================================
+// 12. PDF PRACTICE: CREATE A RED BUTTON AND INSERT IT FIRST IN BODY
+// ============================================================================
+
+/*
+Task from the PDF:
+Create a button, text "click me", red background, white text.
+Insert it as the first element inside body.
+*/
+
+const pdfButton = document.createElement("button");
+pdfButton.textContent = "click me";
+pdfButton.style.backgroundColor = "red";
+pdfButton.style.color = "white";
+pdfButton.style.padding = "8px 14px";
+pdfButton.style.border = "none";
+pdfButton.style.cursor = "pointer";
+
+// Uncomment to add it at the beginning of body:
+// document.body.prepend(pdfButton);
+
+
+// ============================================================================
+// 13. EVENTS: addEventListener()
+// ============================================================================
+
+/*
+HTML:
+<h1 id="eventHeading">Original heading</h1>
+<button id="changeHeadingButton">Change heading</button>
+*/
+
+const eventHeading = document.getElementById("eventHeading");
+const changeHeadingButton = document.getElementById("changeHeadingButton");
+
+if (eventHeading && changeHeadingButton) {
+    changeHeadingButton.addEventListener("click", function () {
+        eventHeading.textContent = "I am learning DOM!";
     });
 }
 
 /*
-input.value -> gets the value entered by the user.
+Common events:
+click       -> click an element
+input       -> input value changes
+change      -> a value/selection is committed
+submit      -> form submitted
+mouseover   -> pointer enters element
+mouseout    -> pointer leaves element
+keydown     -> key pressed
+keyup       -> key released
 
-textContent -> displays text inside an element.
+Pattern:
+element.addEventListener("eventName", callbackFunction);
 */
 
 
-// ============================================================
-// 10. THE input EVENT
-// ============================================================
+// ============================================================================
+// 14. INPUT FIELDS AND THE input EVENT
+// ============================================================================
 
-// HTML:
-// <input id="liveInput" type="text">
-// <p id="liveOutput"></p>
+/*
+HTML:
+<input id="nameInput" type="text" placeholder="Enter your name">
+<p id="liveGreeting"></p>
+*/
 
-const liveInput = document.getElementById("liveInput");
-const liveOutput = document.getElementById("liveOutput");
+const nameInput = document.getElementById("nameInput");
+const liveGreeting = document.getElementById("liveGreeting");
 
-if (liveInput && liveOutput) {
-    liveInput.addEventListener("input", function () {
-        liveOutput.textContent = liveInput.value;
+if (nameInput && liveGreeting) {
+    nameInput.addEventListener("input", function () {
+        const name = nameInput.value.trim();
+
+        liveGreeting.textContent = name
+            ? `Hello, ${name}!`
+            : "Your greeting will appear here.";
     });
 }
 
 /*
-"input" fires whenever the input value changes.
-Useful for live search, previews and validation.
+input.value -> the current value entered by the user.
+trim()      -> removes whitespace at the beginning and end.
 */
 
 
-// ============================================================
-// 11. FORM SUBMISSION
-// ============================================================
+// ============================================================================
+// 15. FORMS AND preventDefault()
+// ============================================================================
 
-// HTML:
-// <form id="myForm">
-//     <input id="email" type="email" required>
-//     <button type="submit">Submit</button>
-// </form>
-// <p id="formOutput"></p>
+/*
+HTML:
+<form id="signupForm">
+    <input id="signupEmail" type="email" required>
+    <button type="submit">Submit</button>
+</form>
+<p id="signupMessage"></p>
+*/
 
-const myForm = document.getElementById("myForm");
-const emailInput = document.getElementById("email");
-const formOutput = document.getElementById("formOutput");
+const signupForm = document.getElementById("signupForm");
+const signupEmail = document.getElementById("signupEmail");
+const signupMessage = document.getElementById("signupMessage");
 
-if (myForm && emailInput && formOutput) {
-    myForm.addEventListener("submit", function (event) {
-        // Prevent browser's default form submission
+if (signupForm && signupEmail && signupMessage) {
+    signupForm.addEventListener("submit", function (event) {
+        // Stop the browser's default form submission/navigation:
         event.preventDefault();
 
-        formOutput.textContent = `Submitted: ${emailInput.value}`;
+        signupMessage.textContent = `Form captured for: ${signupEmail.value}`;
     });
 }
 
 /*
-event.preventDefault() stops the default browser behavior.
-For a form, that normally includes navigation/submission.
+event.preventDefault() prevents a default browser action.
+It does not automatically validate, save, or send data to a server.
+The browser still applies built-in form validation for required/email fields.
 */
 
 
-// ============================================================
-// 12. CHECKBOX
-// ============================================================
+// ============================================================================
+// 16. CHECKBOXES
+// ============================================================================
 
-// HTML:
-// <input id="agree" type="checkbox">
-// <button id="checkBtn">Check</button>
-// <p id="checkOutput"></p>
+/*
+HTML:
+<label><input id="termsCheckbox" type="checkbox"> I agree</label>
+<button id="checkTermsButton">Check</button>
+<p id="termsMessage"></p>
+*/
 
-const agree = document.getElementById("agree");
-const checkBtn = document.getElementById("checkBtn");
-const checkOutput = document.getElementById("checkOutput");
+const termsCheckbox = document.getElementById("termsCheckbox");
+const checkTermsButton = document.getElementById("checkTermsButton");
+const termsMessage = document.getElementById("termsMessage");
 
-if (agree && checkBtn && checkOutput) {
-    checkBtn.addEventListener("click", function () {
-        if (agree.checked) {
-            checkOutput.textContent = "Checkbox selected";
+if (termsCheckbox && checkTermsButton && termsMessage) {
+    checkTermsButton.addEventListener("click", function () {
+        if (termsCheckbox.checked) {
+            termsMessage.textContent = "You agreed.";
         } else {
-            checkOutput.textContent = "Checkbox not selected";
+            termsMessage.textContent = "Please tick the checkbox.";
         }
     });
 }
 
 
-// ============================================================
-// 13. CREATING HTML ELEMENTS
-// ============================================================
+// ============================================================================
+// 17. KEYBOARD EVENTS
+// ============================================================================
 
-// HTML:
-// <ul id="list"></ul>
-// <button id="addItem">Add Item</button>
+/*
+HTML:
+<input id="keyboardInput" type="text" placeholder="Press a key">
+<p id="keyMessage"></p>
+*/
 
-const list = document.getElementById("list");
-const addItemBtn = document.getElementById("addItem");
+const keyboardInput = document.getElementById("keyboardInput");
+const keyMessage = document.getElementById("keyMessage");
 
-if (list && addItemBtn) {
-    addItemBtn.addEventListener("click", function () {
-        // Create a new element
-        const li = document.createElement("li");
-
-        // Set its text
-        li.textContent = "New list item";
-
-        // Add it to the page
-        list.appendChild(li);
+if (keyboardInput && keyMessage) {
+    keyboardInput.addEventListener("keydown", function (event) {
+        keyMessage.textContent = `Key pressed: ${event.key}`;
     });
 }
 
+
+// ============================================================================
+// 18. DOM TRAVERSAL: PARENT, CHILDREN AND SIBLINGS
+// ============================================================================
+
 /*
-createElement() -> creates an element.
-appendChild()   -> adds it to another element.
+HTML:
+<div id="parent">
+    <p id="firstChild">First</p>
+    <p id="secondChild">Second</p>
+    <p id="thirdChild">Third</p>
+</div>
+*/
+
+const firstChild = document.getElementById("firstChild");
+
+if (firstChild) {
+    console.log("Parent:", firstChild.parentElement);
+    console.log("Next sibling:", firstChild.nextElementSibling);
+    console.log("Previous sibling:", firstChild.previousElementSibling);
+
+    const parent = firstChild.parentElement;
+    if (parent) {
+        console.log("Child elements:", parent.children);
+        console.log("First element child:", parent.firstElementChild);
+        console.log("Last element child:", parent.lastElementChild);
+    }
+}
+
+/*
+Useful traversal properties:
+parentElement
+children
+firstElementChild
+lastElementChild
+nextElementSibling
+previousElementSibling
 */
 
 
-// ============================================================
-// 14. APPENDING AND REMOVING ELEMENTS
-// ============================================================
+// ============================================================================
+// 19. EVENT OBJECT AND TARGET
+// ============================================================================
 
-// HTML:
-// <div id="container"></div>
+/*
+The browser passes an event object to an event callback.
+It contains details about the event.
 
-const container = document.getElementById("container");
+HTML:
+<button class="colorButton">Red</button>
+<button class="colorButton">Blue</button>
+<p id="colorOutput"></p>
+*/
 
-if (container) {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = "Created with JavaScript";
+const colorButtons = document.querySelectorAll(".colorButton");
+const colorOutput = document.getElementById("colorOutput");
 
-    // Add child
-    container.appendChild(paragraph);
+colorButtons.forEach((button) => {
+    button.addEventListener("click", function (event) {
+        console.log("Clicked element:", event.target);
 
-    // Remove child
-    // paragraph.remove();
-}
-
-
-// ============================================================
-// 15. LOOPING THROUGH DOM ELEMENTS
-// ============================================================
-
-// HTML:
-// <p class="item">Apple</p>
-// <p class="item">Banana</p>
-// <p class="item">Mango</p>
-
-const items = document.querySelectorAll(".item");
-
-items.forEach(function (item) {
-    console.log(item.textContent);
+        if (colorOutput) {
+            colorOutput.textContent = `You clicked: ${event.target.textContent}`;
+        }
+    });
 });
 
-// Change all selected items
-// items.forEach(item => {
-//     item.style.color = "green";
-// });
-
-
-// ============================================================
-// 16. DOM TRAVERSAL
-// ============================================================
-
-// HTML:
-// <div id="parent">
-//     <p id="child">Hello</p>
-// </div>
-
-const child = document.getElementById("child");
-
-if (child) {
-    console.log(child.parentElement);
-
-    // console.log(child.parentElement.children);
-    // console.log(child.nextElementSibling);
-    // console.log(child.previousElementSibling);
-}
-
 /*
-parentElement       -> parent element
-children            -> child elements
-nextElementSibling  -> next sibling element
-previousElementSibling -> previous sibling element
+event.target        -> the element where the event originated
+event.currentTarget -> the element whose listener is currently running
 */
 
 
-// ============================================================
-// 17. ATTRIBUTES
-// ============================================================
-
-// HTML:
-// <a id="link" href="https://example.com">Visit</a>
-
-const link = document.getElementById("link");
-
-if (link) {
-    console.log(link.getAttribute("href"));
-
-    // Change an attribute:
-    // link.setAttribute("href", "https://example.org");
-
-    // Check an attribute:
-    console.log(link.hasAttribute("href"));
-
-    // Remove an attribute:
-    // link.removeAttribute("target");
-}
-
-
-// ============================================================
-// 18. DOM CONTENT LOADED
-// ============================================================
-
-// If your script uses a normal script tag without defer,
-// wait for the HTML to be parsed before selecting elements.
+// ============================================================================
+// 20. MINI PROJECT: COUNTER
+// ============================================================================
 
 /*
-document.addEventListener("DOMContentLoaded", function () {
-    const title = document.getElementById("title");
-    console.log(title);
-});
-
-With <script src="dom_revision.js" defer></script>,
-you normally do not need this wrapper for initial selection.
+HTML:
+<h2 id="countDisplay">0</h2>
+<button id="decreaseCount">-</button>
+<button id="resetCount">Reset</button>
+<button id="increaseCount">+</button>
 */
 
+const countDisplay = document.getElementById("countDisplay");
+const decreaseCount = document.getElementById("decreaseCount");
+const resetCount = document.getElementById("resetCount");
+const increaseCount = document.getElementById("increaseCount");
 
-// ============================================================
-// 19. MINI PROJECT — COUNTER
-// ============================================================
-
-// HTML needed:
-// <h2 id="count">0</h2>
-// <button id="decrease">-</button>
-// <button id="reset">Reset</button>
-// <button id="increase">+</button>
-
-const countDisplay = document.getElementById("count");
-const decreaseBtn = document.getElementById("decrease");
-const resetBtn = document.getElementById("reset");
-const increaseBtn = document.getElementById("increase");
-
-if (countDisplay && decreaseBtn && resetBtn && increaseBtn) {
+if (countDisplay && decreaseCount && resetCount && increaseCount) {
     let count = 0;
 
-    increaseBtn.addEventListener("click", function () {
+    increaseCount.addEventListener("click", function () {
         count++;
         countDisplay.textContent = count;
     });
 
-    decreaseBtn.addEventListener("click", function () {
+    decreaseCount.addEventListener("click", function () {
         count--;
         countDisplay.textContent = count;
     });
 
-    resetBtn.addEventListener("click", function () {
+    resetCount.addEventListener("click", function () {
         count = 0;
         countDisplay.textContent = count;
     });
 }
 
 
-// ============================================================
-// 20. MINI PROJECT — TO-DO LIST
-// ============================================================
-
-// HTML needed:
-// <input id="taskInput" type="text">
-// <button id="addTask">Add Task</button>
-// <ul id="taskList"></ul>
-
-const taskInput = document.getElementById("taskInput");
-const addTaskBtn = document.getElementById("addTask");
-const taskList = document.getElementById("taskList");
-
-if (taskInput && addTaskBtn && taskList) {
-    addTaskBtn.addEventListener("click", function () {
-        const task = taskInput.value.trim();
-
-        // Do not add empty tasks
-        if (task === "") {
-            return;
-        }
-
-        const li = document.createElement("li");
-        const deleteBtn = document.createElement("button");
-
-        // Use textContent for user-provided text
-        li.textContent = task + " ";
-
-        deleteBtn.textContent = "Delete";
-
-        deleteBtn.addEventListener("click", function () {
-            li.remove();
-        });
-
-        li.appendChild(deleteBtn);
-        taskList.appendChild(li);
-
-        // Clear input
-        taskInput.value = "";
-    });
-}
-
-/*
-This project combines:
-- Selecting elements
-- Reading input values
-- Click events
-- Conditions
-- Creating elements
-- Adding and removing elements
-- Functions and methods
-*/
-
-
-// ============================================================
-// 21. COMMON DOM METHODS AND PROPERTIES
-// ============================================================
-
-/*
-SELECTING
-document.getElementById()
-document.querySelector()
-document.querySelectorAll()
-
-READING / CHANGING CONTENT
-element.textContent
-element.innerHTML
-input.value
-
-STYLING
-element.style
-element.classList.add()
-element.classList.remove()
-element.classList.toggle()
-element.classList.contains()
-
-EVENTS
-element.addEventListener()
-
-CREATING / ADDING / REMOVING
-document.createElement()
-element.appendChild()
-element.append()
-element.remove()
-
-ATTRIBUTES
-element.getAttribute()
-element.setAttribute()
-element.hasAttribute()
-element.removeAttribute()
-
-TRAVERSAL
-element.parentElement
-element.children
-element.nextElementSibling
-element.previousElementSibling
-*/
-
-
-// ============================================================
-// 22. IMPORTANT DIFFERENCES
-// ============================================================
+// ============================================================================
+// 21. MINI PROJECT: TO-DO LIST
+// ============================================================================
 
 /*
 HTML:
-<h1 id="title">Hello</h1>
+<input id="taskInput" type="text" placeholder="Enter a task">
+<button id="addTaskButton">Add task</button>
+<ul id="taskList"></ul>
 
-JavaScript:
-document.getElementById("title")
+This example uses textContent for user-entered text rather than innerHTML.
+*/
 
-Remember:
+const taskInput = document.getElementById("taskInput");
+const addTaskButton = document.getElementById("addTaskButton");
+const taskList = document.getElementById("taskList");
 
-1. getElementById("title") uses the ID without #.
-2. querySelector("#title") uses the CSS selector #.
-3. querySelector() returns the first matching element.
-4. querySelectorAll() returns all matching elements.
-5. input.value reads an input field's value.
-6. textContent reads or changes an element's text.
-7. addEventListener() attaches event behavior.
-8. Use const for element references that won't be reassigned.
-9. DOM code needs a browser environment.
-10. Use textContent rather than innerHTML for untrusted text.
+if (taskInput && addTaskButton && taskList) {
+    function addTask() {
+        const taskText = taskInput.value.trim();
+
+        if (taskText === "") {
+            taskInput.focus();
+            return;
+        }
+
+        const listItem = document.createElement("li");
+        const taskLabel = document.createElement("span");
+        const deleteButton = document.createElement("button");
+
+        taskLabel.textContent = taskText;
+        deleteButton.textContent = "Delete";
+        deleteButton.type = "button";
+
+        deleteButton.addEventListener("click", function () {
+            listItem.remove();
+        });
+
+        listItem.append(taskLabel, " ", deleteButton);
+        taskList.append(listItem);
+
+        taskInput.value = "";
+        taskInput.focus();
+    }
+
+    addTaskButton.addEventListener("click", addTask);
+
+    // Let the user add a task by pressing Enter:
+    taskInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            addTask();
+        }
+    });
+}
+
+
+// ============================================================================
+// 22. EXTRA CONCEPT: EVENT DELEGATION
+// ============================================================================
+
+/*
+Event delegation uses one listener on a parent to handle events from its
+children. It is useful when children are created dynamically.
+
+Example HTML:
+<ul id="delegatedList">
+    <li><button class="removeItem">Remove</button></li>
+</ul>
+*/
+
+const delegatedList = document.getElementById("delegatedList");
+
+if (delegatedList) {
+    delegatedList.addEventListener("click", function (event) {
+        // event.target may be the clicked button or an element inside it.
+        const removeButton = event.target.closest(".removeItem");
+
+        if (removeButton && delegatedList.contains(removeButton)) {
+            const item = removeButton.closest("li");
+            if (item) {
+                item.remove();
+            }
+        }
+    });
+}
+
+
+// ============================================================================
+// 23. EXTRA CONCEPT: DOM READY AND SCRIPT LOADING
+// ============================================================================
+
+/*
+Recommended HTML:
+<script src="dom.js" defer></script>
+
+defer makes the browser execute the external script after the HTML has been
+parsed, while preserving script order.
+
+Alternative:
+document.addEventListener("DOMContentLoaded", function () {
+    // Code that needs the parsed HTML goes here.
+});
+
+If a script runs before an element exists in the DOM, a selector may return
+null. The null checks in this file prevent many common errors.
 */
 
 
-// ============================================================
-// END OF DOM REVISION
-// ============================================================
+// ============================================================================
+// 24. COMMON MISTAKES
+// ============================================================================
+
+/*
+WRONG:
+document.getElementById("#title");
+
+RIGHT:
+document.getElementById("title");
+
+WRONG:
+document.querySelector("title"); // This selects the <title> tag, not id=title.
+
+RIGHT:
+document.querySelector("#title");
+
+WRONG:
+title.textContent = "<b>Hello</b>"; // This displays the angle brackets as text.
+
+RIGHT, if you want plain text:
+title.textContent = "Hello";
+
+WRONG:
+element.className = "newClass"; // If there was an old class, it gets replaced.
+
+RIGHT, if you want to keep old classes:
+element.classList.add("newClass");
+
+WRONG:
+const button = document.getElementById("missing");
+button.addEventListener("click", ...); // Error if button is null.
+
+RIGHT:
+const button = document.getElementById("missing");
+if (button) {
+    button.addEventListener("click", ...);
+}
+
+REMEMBER:
+- A selector can return null if no element matches.
+- Use .value for the current value of an input.
+- Use .checked for a checkbox/radio's current checked state.
+- Use addEventListener() for event handling.
+- Use createElement() to create an element.
+- Use append()/prepend() to insert inside a parent.
+- Use before()/after() to insert outside an element.
+- Use remove() to remove an element.
+*/
+
+
+// ============================================================================
+// 25. QUICK REVISION CHECKLIST
+// ============================================================================
+
+/*
+[ ] I can explain the DOM tree.
+[ ] I know the difference between window and document.
+[ ] I can select elements by ID, class, tag and CSS selector.
+[ ] I understand querySelector() vs querySelectorAll().
+[ ] I know innerText vs textContent vs innerHTML.
+[ ] I can read and set attributes.
+[ ] I can change inline styles and use classList.
+[ ] I can create, append, prepend, insert and remove elements.
+[ ] I can attach click, input, submit and keyboard event listeners.
+[ ] I can read input.value and checkbox.checked.
+[ ] I can use event.preventDefault().
+[ ] I can build a counter and a basic to-do list.
+[ ] I know why textContent is safer for user-provided text.
+*/
+
+// END OF DOM REVISION FILE
