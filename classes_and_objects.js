@@ -1,98 +1,205 @@
 /*
 ============================================================
-JAVASCRIPT CLASSES AND OBJECTS — COMPLETE REVISION
-WITH PYTHON OOP COMPARISONS
+JS11: CLASSES, OBJECTS, PROTOTYPES & ERROR HANDLING
 ============================================================
 
-Topics:
-1. Objects
-2. Classes and instances
-3. Constructor
-4. this vs self
-5. Properties and methods
-6. Default parameters and validation
-7. Static methods and properties
-8. Getters and setters
-9. Inheritance and super()
-10. Method overriding
-11. Encapsulation and private fields
-12. Composition
-13. instanceof
-14. Object references
-15. Common mistakes
-16. Python vs JavaScript OOP
-17. Practice exercises
+TOPICS:
+1. Objects: state and behaviour
+2. Prototypes and __proto__
+3. Classes and objects
+4. constructor()
+5. this keyword
+6. Inheritance using extends
+7. Method overriding
+8. super keyword
+9. User and Admin practice question
+10. Error handling: try...catch
+11. Additional important concepts
+12. Quick revision and practice
 */
 
 
 // ============================================================
-// 1. OBJECTS
+// 1. OBJECTS: STATE AND BEHAVIOUR
 // ============================================================
 
 /*
-THEORY:
-An object stores related data as key-value pairs.
+An object is an entity containing:
 
-Properties store data.
-Methods are functions associated with an object.
+STATE      = Properties / data
+BEHAVIOUR  = Methods / functions
 
-Python:
-student = {"name": "Asha", "age": 20}
-
-JavaScript:
-const student = { name: "Asha", age: 20 };
+Example:
+A student has a name and email (state).
+A student can display their details (behaviour).
 */
 
-const studentObject = {
-    name: "Asha",
-    age: 20,
+const student = {
+    name: "Rahul",
+    email: "rahul@example.com",
 
-    introduce: function () {
-        console.log(`Hi, I am ${this.name}. I am ${this.age} years old.`);
+    viewData: function () {
+        console.log("Student details:");
+        console.log(this.name);
+        console.log(this.email);
     }
 };
 
 console.log("\n--- 1. Objects ---");
 
-console.log(studentObject.name);
-console.log(studentObject["age"]);
+console.log(student.name);
+console.log(student.email);
 
-studentObject.age = 21;
-studentObject.city = "Bhopal";
-
-studentObject.introduce();
-
-
-// ============================================================
-// 2. WHY CLASSES?
-// ============================================================
+student.viewData();
 
 /*
-A class is a blueprint for creating objects with similar properties
-and behavior.
-
-An object created from a class is called an instance.
-
-Analogy:
-Class  = House blueprint
-Object = Actual house
+Output:
+Rahul
+rahul@example.com
+Student details:
+Rahul
+rahul@example.com
 */
 
 
 // ============================================================
-// 3. CLASS, CONSTRUCTOR, INSTANCES, AND THIS
+// 2. PROTOTYPES IN JAVASCRIPT
 // ============================================================
 
 /*
-- class Student declares a class.
-- constructor() initializes an instance.
-- new Student() creates an instance.
-- this refers to the current instance in these method calls.
+THEORY:
+
+JavaScript objects have an internal prototype link.
+
+An object can access properties and methods from its prototype
+through the prototype chain.
+
+If an object and its prototype have methods with the same name,
+the object's own method is used first.
+
+The PDF introduces __proto__ to access/set the prototype.
+It is included here for learning; modern code usually prefers
+Object.create() when creating an object with a chosen prototype.
+*/
+
+const parentObject = {
+    greet: function () {
+        console.log("Hello from parent!");
+    },
+
+    showInfo: function () {
+        console.log("This method comes from the prototype.");
+    }
+};
+
+const childObject = {
+    name: "Aman",
+
+    greet: function () {
+        console.log("Hello from child!");
+    }
+};
+
+// Link childObject to parentObject for this example.
+childObject.__proto__ = parentObject;
+
+console.log("\n--- 2. Prototypes ---");
+
+childObject.greet();
+// Output: Hello from child!
+// The object's own method takes priority.
+
+childObject.showInfo();
+// Output: This method comes from the prototype.
+
+console.log(childObject.name);
+// Output: Aman
+
+/*
+How JavaScript searches for a method:
+
+1. Check childObject itself.
+2. If not found, check its prototype.
+3. Continue up the prototype chain.
+4. If not found anywhere, the result is undefined.
+
+Modern alternative:
+
+const anotherChild = Object.create(parentObject);
+anotherChild.name = "Riya";
+anotherChild.showInfo();
+*/
+
+
+// ============================================================
+// 3. CLASSES IN JAVASCRIPT
+// ============================================================
+
+/*
+THEORY:
+
+A class is a template for creating objects.
+
+Syntax:
+
+class MyClass {
+    constructor() {
+        // Initialize object
+    }
+
+    myMethod() {
+        // Behaviour
+    }
+}
+
+const obj = new MyClass();
+
+The new keyword creates a class instance.
+The constructor is automatically called during construction.
+*/
+
+class MyClass {
+    constructor() {
+        this.message = "Hello from MyClass!";
+    }
+
+    myMethod() {
+        console.log(this.message);
+    }
+}
+
+console.log("\n--- 3. Classes ---");
+
+const myObj = new MyClass();
+
+myObj.myMethod();
+
+// Output: Hello from MyClass!
+
+
+// ============================================================
+// 4. CONSTRUCTOR AND THIS
+// ============================================================
+
+/*
+constructor():
+
+- Initializes a new object.
+- Runs automatically when using new.
+- Can receive arguments.
+
+this:
+
+- Refers to the current instance in these method calls.
+- Allows us to access or update the object's properties.
 
 Python comparison:
-JavaScript constructor() ~ Python __init__()
-JavaScript this          ~ Python self
-JavaScript new Student() ~ Python Student()
+
+Python:      __init__(self, name)
+JavaScript:  constructor(name)
+
+Python:      self.name = name
+JavaScript:  this.name = name
 */
 
 class Student {
@@ -102,19 +209,17 @@ class Student {
     }
 
     introduce() {
-        console.log(`My name is ${this.name}, and I am ${this.age}.`);
+        console.log(`My name is ${this.name}.`);
+        console.log(`My age is ${this.age}.`);
     }
 
     haveBirthday() {
-        this.age += 1;
-
-        console.log(
-            `Happy birthday, ${this.name}! Age is now ${this.age}.`
-        );
+        this.age++;
+        console.log(`New age: ${this.age}`);
     }
 }
 
-console.log("\n--- 3. Classes and instances ---");
+console.log("\n--- 4. Constructor and this ---");
 
 const student1 = new Student("Rahul", 20);
 const student2 = new Student("Aman", 22);
@@ -128,484 +233,385 @@ console.log(student1.age); // 21
 console.log(student2.age); // 22
 
 /*
-Each object has its own properties.
+Each instance has its own name and age.
 
 Changing student1.age does not change student2.age.
 */
 
 
 // ============================================================
-// 4. PROPERTIES VS METHODS
+// 5. INHERITANCE USING extends
 // ============================================================
 
 /*
-Property = Data associated with an object.
-Method   = Action an object can perform.
+THEORY:
 
-Examples:
-this.name       -> Property
-this.balance    -> Property
-deposit()       -> Method
-showBalance()   -> Method
+Inheritance allows a child class to inherit properties and methods
+from a parent class.
+
+Syntax:
+
+class Parent { }
+
+class Child extends Parent { }
+
+The child can use inherited parent methods.
 */
 
-class BankAccount {
-    constructor(owner, startingBalance) {
-        this.owner = owner;
-        this.balance = startingBalance;
-    }
-
-    deposit(amount) {
-        if (amount <= 0) {
-            console.log("Deposit amount must be positive.");
-            return;
-        }
-
-        this.balance += amount;
-
-        console.log(`${this.owner} deposited ${amount}.`);
-    }
-
-    withdraw(amount) {
-        if (amount <= 0) {
-            console.log("Withdrawal amount must be positive.");
-            return;
-        }
-
-        if (amount > this.balance) {
-            console.log("Insufficient balance.");
-            return;
-        }
-
-        this.balance -= amount;
-
-        console.log(`${this.owner} withdrew ${amount}.`);
-    }
-
-    showBalance() {
-        console.log(`${this.owner}'s balance: ${this.balance}`);
+class Parent {
+    parentMethod() {
+        console.log("This method belongs to Parent.");
     }
 }
 
-console.log("\n--- 4. Properties and methods ---");
-
-const account1 = new BankAccount("Neha", 1000);
-
-account1.deposit(500);
-account1.withdraw(200);
-account1.showBalance(); // 1300
-
-
-// ============================================================
-// 5. THE THIS KEYWORD
-// ============================================================
-
-/*
-In car1.accelerate(), this refers to car1.
-In car2.accelerate(), this refers to car2.
-
-JavaScript's this depends on how a function is called.
-
-Arrow functions do not create their own this; they capture it from
-the surrounding scope.
-*/
-
-class Car {
-    constructor(brand, speed = 0) {
-        this.brand = brand;
-        this.speed = speed;
-    }
-
-    accelerate(amount) {
-        this.speed += amount;
-
-        console.log(`${this.brand} speed: ${this.speed}`);
+class Child extends Parent {
+    childMethod() {
+        console.log("This method belongs to Child.");
     }
 }
 
-console.log("\n--- 5. this ---");
+console.log("\n--- 5. Inheritance ---");
 
-const car1 = new Car("BMW", 50);
-const car2 = new Car("Audi", 80);
+const child = new Child();
 
-car1.accelerate(10); // BMW speed: 60
-car2.accelerate(5);  // Audi speed: 85
-
-
-// ============================================================
-// 6. DEFAULT PARAMETERS AND VALIDATION
-// ============================================================
+child.parentMethod(); // Inherited
+child.childMethod();  // Child's own method
 
 /*
-Default parameters provide a value when an argument is omitted.
+Python comparison:
 
-Validation checks whether supplied data follows the class's rules.
+class Child(Parent):
+    pass
+
+JavaScript:
+
+class Child extends Parent {}
 */
 
-class Product {
-    constructor(name, price = 0) {
-        if (price < 0) {
-            throw new Error("Price cannot be negative.");
-        }
-
-        this.name = name;
-        this.price = price;
-    }
-
-    showProduct() {
-        console.log(`${this.name}: ₹${this.price}`);
-    }
-}
-
-console.log("\n--- 6. Defaults and validation ---");
-
-const product1 = new Product("Notebook", 50);
-const product2 = new Product("Pen");
-
-product1.showProduct();
-product2.showProduct();
-
-// Uncomment to test:
-// const invalidProduct = new Product("Broken product", -10);
-
 
 // ============================================================
-// 7. STATIC METHODS AND PROPERTIES
+// 6. METHOD OVERRIDING
 // ============================================================
 
 /*
-Static members belong to the class itself, not to each instance.
+THEORY:
 
-Call them using ClassName.methodName().
-*/
+When a child class defines a method with the same name as a
+parent method, the child's method is used for that child object.
 
-class MathHelper {
-    static description = "A small math utility";
-
-    static add(a, b) {
-        return a + b;
-    }
-}
-
-console.log("\n--- 7. Static members ---");
-
-console.log(MathHelper.description);
-console.log(MathHelper.add(5, 3)); // 8
-
-// Static methods are called on the class, not an instance.
-// const helper = new MathHelper();
-// helper.add(5, 3); // TypeError
-
-
-// ============================================================
-// 8. GETTERS AND SETTERS
-// ============================================================
-
-/*
-Getter:
-Reads a value using property-like syntax.
-
-Setter:
-Assigns a value and can validate it.
-
-Use person.fullName, not person.fullName().
-*/
-
-class Person {
-    constructor(firstName, lastName, age) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.age = age;
-    }
-
-    get fullName() {
-        return `${this.firstName} ${this.lastName}`;
-    }
-
-    set age(value) {
-        if (value < 0) {
-            throw new Error("Age cannot be negative.");
-        }
-
-        this._age = value;
-    }
-
-    get age() {
-        return this._age;
-    }
-}
-
-console.log("\n--- 8. Getters and setters ---");
-
-const person1 = new Person("Riya", "Sharma", 24);
-
-console.log(person1.fullName);
-console.log(person1.age);
-
-person1.age = 25;
-
-console.log(person1.age);
-
-// Uncomment to test:
-// person1.age = -1;
-
-
-// ============================================================
-// 9. INHERITANCE AND SUPER
-// ============================================================
-
-/*
-Inheritance allows a child class to reuse or specialize a parent class.
-
-extends declares inheritance.
-super() calls the parent constructor.
-
-In a derived constructor, call super() before using this.
+This is called METHOD OVERRIDING.
 */
 
 class Animal {
-    constructor(name) {
-        this.name = name;
-    }
-
     speak() {
-        console.log(`${this.name} makes a sound.`);
+        console.log("Animal makes a sound.");
     }
 }
 
 class Dog extends Animal {
-    constructor(name, breed) {
-        super(name);
-
-        this.breed = breed;
-    }
-
-    fetch() {
-        console.log(`${this.name} is fetching the ball.`);
-    }
-}
-
-console.log("\n--- 9. Inheritance ---");
-
-const dog1 = new Dog("Bruno", "Labrador");
-
-dog1.speak();
-dog1.fetch();
-
-console.log(dog1.breed);
-
-
-// ============================================================
-// 10. METHOD OVERRIDING
-// ============================================================
-
-/*
-Method overriding occurs when a child class provides its own
-implementation of a method inherited from its parent.
-*/
-
-class Cat extends Animal {
     speak() {
-        console.log(`${this.name} says meow.`);
+        console.log("Dog barks.");
     }
 }
 
-console.log("\n--- 10. Method overriding ---");
+console.log("\n--- 6. Method overriding ---");
 
-const cat1 = new Cat("Milo");
+const animal = new Animal();
+const dog = new Dog();
 
-cat1.speak();
+animal.speak();
+// Animal makes a sound.
 
-
-// ============================================================
-// 11. ENCAPSULATION AND PRIVATE FIELDS
-// ============================================================
+dog.speak();
+// Dog barks.
 
 /*
-Encapsulation controls access to an object's internal state.
+The Dog class overrides Animal's speak() method.
 
-JavaScript private fields begin with #.
-They cannot be accessed directly outside their class.
+The parent's version can still be called using super.speak().
 */
 
-class SecureWallet {
-    #balance;
-
-    constructor(startingBalance = 0) {
-        if (startingBalance < 0) {
-            throw new Error("Starting balance cannot be negative.");
-        }
-
-        this.#balance = startingBalance;
-    }
-
-    addMoney(amount) {
-        if (amount <= 0) {
-            console.log("Amount must be positive.");
-            return;
-        }
-
-        this.#balance += amount;
-    }
-
-    getBalance() {
-        return this.#balance;
-    }
-}
-
-console.log("\n--- 11. Encapsulation ---");
-
-const wallet = new SecureWallet(100);
-
-wallet.addMoney(50);
-
-console.log(wallet.getBalance()); // 150
-
-// wallet.#balance; // SyntaxError outside the class
-
 
 // ============================================================
-// 12. COMPOSITION
+// 7. SUPER KEYWORD
 // ============================================================
 
 /*
-Composition builds a larger object by combining smaller objects.
-A Vehicle object can contain an Engine object.
+THEORY:
+
+super is used to access parent-class functionality.
+
+1. super(arguments)
+   Calls the parent constructor.
+
+2. super.methodName(arguments)
+   Calls a parent method.
+
+IMPORTANT:
+In a derived class constructor, call super() before using this.
 */
 
-class Engine {
-    start() {
-        console.log("Engine started.");
+class Person {
+    constructor(name, email) {
+        this.name = name;
+        this.email = email;
+    }
+
+    showDetails() {
+        console.log(`Name: ${this.name}`);
+        console.log(`Email: ${this.email}`);
     }
 }
 
-class Vehicle {
-    constructor(brand, engine) {
-        this.brand = brand;
-        this.engine = engine;
+class CollegeStudent extends Person {
+    constructor(name, email, course) {
+        super(name, email);
+
+        this.course = course;
     }
 
-    startVehicle() {
-        console.log(`${this.brand} is starting.`);
+    showCollegeDetails() {
+        super.showDetails();
 
-        this.engine.start();
+        console.log(`Course: ${this.course}`);
     }
 }
 
-console.log("\n--- 12. Composition ---");
+console.log("\n--- 7. super keyword ---");
 
-const engine1 = new Engine();
-const vehicle1 = new Vehicle("Toyota", engine1);
+const collegeStudent = new CollegeStudent(
+    "Rahul",
+    "rahul@example.com",
+    "Data Science"
+);
 
-vehicle1.startVehicle();
+collegeStudent.showCollegeDetails();
+
+/*
+Output:
+Name: Rahul
+Email: rahul@example.com
+Course: Data Science
+*/
 
 
 // ============================================================
-// 13. INSTANCEOF AND OBJECT IDENTITY
+// 8. PDF PRACTICE: COLLEGE WEBSITE USER AND ADMIN
 // ============================================================
 
 /*
-instanceof checks whether a class's prototype appears in an object's
+QUESTION FROM YOUR PDF:
+
+Create a User class with:
+- name
+- email
+- viewData() method
+
+Then create an Admin class that inherits from User.
+Add an editData() method to Admin.
+
+This example displays data in the console.
+It does not update a real website or database.
+*/
+
+class User {
+    constructor(name, email) {
+        this.name = name;
+        this.email = email;
+    }
+
+    viewData() {
+        console.log("\nCollege website data:");
+
+        console.log("Course: Data Science");
+        console.log("Department: Computer Science");
+        console.log("Announcement: Registration is open.");
+    }
+}
+
+class Admin extends User {
+    editData(newAnnouncement) {
+        console.log(`\nAdmin ${this.name} edited the website data.`);
+        console.log(`New announcement: ${newAnnouncement}`);
+    }
+}
+
+console.log("\n--- 8. User and Admin ---");
+
+const user1 = new User(
+    "Aman",
+    "aman@example.com"
+);
+
+console.log("User:", user1.name);
+console.log("Email:", user1.email);
+
+user1.viewData();
+
+const admin1 = new Admin(
+    "Riya",
+    "riya@example.com"
+);
+
+console.log("\nAdmin:", admin1.name);
+
+// Admin inherits viewData() from User.
+admin1.viewData();
+
+// Admin has its own editData() method.
+admin1.editData("The college fest is on Friday.");
+
+/*
+IMPORTANT:
+
+User:
+- Has name and email.
+- Can view website data.
+
+Admin:
+- Inherits name and email from User.
+- Inherits viewData() from User.
+- Adds editData().
+
+This is a practical example of inheritance.
+*/
+
+
+// ============================================================
+// 9. ERROR HANDLING: try...catch
+// ============================================================
+
+/*
+THEORY:
+
+try:
+Contains code that may throw an error.
+
+catch (err):
+Handles an error thrown in the try block.
+
+err.message:
+Provides the error message.
+
+Why use it?
+It lets the program handle expected failures instead of stopping
+without a useful response.
+*/
+
+console.log("\n--- 9. try...catch ---");
+
+try {
+    console.log("Code inside try.");
+
+    throw new Error("Something went wrong!");
+
+    // Code after throw in this block is skipped.
+} catch (err) {
+    console.log("An error occurred:", err.message);
+}
+
+console.log("Program continues after catch.");
+
+/*
+Output:
+Code inside try.
+An error occurred: Something went wrong!
+Program continues after catch.
+*/
+
+
+// ============================================================
+// 10. PRACTICAL ERROR HANDLING WITH USER
+// ============================================================
+
+/*
+Example:
+A user must have both a name and an email.
+
+If either is missing, throw an error and handle it.
+*/
+
+function createUser(name, email) {
+    try {
+        if (!name || !email) {
+            throw new Error("Name and email are required.");
+        }
+
+        return new User(name, email);
+    } catch (err) {
+        console.log("Could not create user:", err.message);
+        return null;
+    }
+}
+
+console.log("\n--- 10. User validation ---");
+
+const validUser = createUser(
+    "Neha",
+    "neha@example.com"
+);
+
+console.log(validUser);
+
+const invalidUser = createUser("", "");
+
+console.log(invalidUser); // null
+
+
+// ============================================================
+// 11. ADDITIONAL IMPORTANT CONCEPT: instanceof
+// ============================================================
+
+/*
+instanceof checks whether an object belongs to a class's
 prototype chain.
+
+It is useful when working with inheritance.
 */
 
-console.log("\n--- 13. instanceof ---");
+console.log("\n--- 11. instanceof ---");
 
-console.log(dog1 instanceof Dog);    // true
-console.log(dog1 instanceof Animal); // true
-console.log(dog1 instanceof Car);    // false
-
-const objectA = { score: 10 };
-const objectB = { score: 10 };
-const objectC = objectA;
-
-console.log(objectA === objectB); // false
-console.log(objectA === objectC); // true
-
-
-// ============================================================
-// 14. OBJECT REFERENCES
-// ============================================================
+console.log(user1 instanceof User);   // true
+console.log(admin1 instanceof Admin); // true
+console.log(admin1 instanceof User);  // true
 
 /*
-Assigning an object to another variable copies its reference,
-not an independent object.
-*/
+Why is admin1 instanceof User true?
 
-console.log("\n--- 14. Object references ---");
-
-const original = { city: "Bhopal" };
-
-const referenceCopy = original;
-referenceCopy.city = "Indore";
-
-console.log(original.city); // Indore
-
-// A shallow copy creates a new outer object.
-const shallowCopy = { ...original };
-
-shallowCopy.city = "Delhi";
-
-console.log(original.city);    // Indore
-console.log(shallowCopy.city); // Delhi
-
-/*
-Spread syntax makes a shallow copy. Nested objects may still be shared.
+Because Admin extends User.
+An Admin instance is also an instance of User through inheritance.
 */
 
 
 // ============================================================
-// 15. COMMON MISTAKES
+// 12. ADDITIONAL IMPORTANT CONCEPT: Object.hasOwn()
 // ============================================================
 
 /*
-1. Forgetting new:
+An object's own properties are different from inherited properties.
 
-   Incorrect:
-   const s = Student("Rahul", 20);
+Object.hasOwn(object, propertyName) checks whether the property
+belongs directly to the object, rather than being inherited.
+*/
 
-   Correct:
-   const s = new Student("Rahul", 20);
+console.log("\n--- 12. Own properties ---");
 
+console.log(Object.hasOwn(admin1, "name"));      // true
+console.log(Object.hasOwn(admin1, "viewData"));  // false
 
-2. Forgetting this:
-
-   Incorrect:
-   introduce() {
-       console.log(name);
-   }
-
-   Correct:
-   introduce() {
-       console.log(this.name);
-   }
-
-
-3. Method reference vs method call:
-
-   student1.introduce;   // Function reference
-   student1.introduce(); // Calls the function
-
-
-4. Forgetting super():
-
-   A derived class must call super() before using this.
-
-
-5. Object assignment doesn't create an independent copy.
-
-
-6. Static methods are accessed through the class.
+/*
+name is created directly on the instance by the parent constructor.
+viewData is defined on User.prototype and inherited by admin1.
 */
 
 
 // ============================================================
-// 16. PYTHON VS JAVASCRIPT OOP COMPARISON
+// 13. PYTHON VS JAVASCRIPT OOP COMPARISON
 // ============================================================
 
 /*
-The Python snippets below are comments for comparison.
-They are not executed by JavaScript.
+The following Python examples are comments only.
+They are included to help you compare Python OOP with JavaScript OOP.
 */
 
 
@@ -617,35 +623,33 @@ They are not executed by JavaScript.
 PYTHON:
 
 class Student:
-    def __init__(self, name, age):
+    def __init__(self, name):
         self.name = name
-        self.age = age
 
-    def introduce(self):
-        print(f"My name is {self.name}, age {self.age}")
+    def greet(self):
+        print(f"Hello {self.name}")
 
-s1 = Student("Rahul", 20)
-s1.introduce()
+s1 = Student("Rahul")
+s1.greet()
 
 
 JAVASCRIPT:
 
 class Student {
-    constructor(name, age) {
+    constructor(name) {
         this.name = name;
-        this.age = age;
     }
 
-    introduce() {
-        console.log(`My name is ${this.name}, age ${this.age}`);
+    greet() {
+        console.log(`Hello ${this.name}`);
     }
 }
 
-const s1 = new Student("Rahul", 20);
-s1.introduce();
+const s1 = new Student("Rahul");
+s1.greet();
 
 
-KEY DIFFERENCES:
+COMPARISON:
 
 Python initializer:       __init__()
 JavaScript initializer:   constructor()
@@ -653,8 +657,8 @@ JavaScript initializer:   constructor()
 Python instance reference: self
 JavaScript instance reference: this
 
-Python object creation:   Student(...)
-JavaScript object creation: new Student(...)
+Python creation:          Student("Rahul")
+JavaScript creation:      new Student("Rahul")
 */
 
 
@@ -663,197 +667,81 @@ JavaScript object creation: new Student(...)
 // ------------------------------------------------------------
 
 /*
-PYTHON:
+Python uses self explicitly as the first instance-method parameter.
 
-class Dog:
-    def __init__(self, name):
-        self.name = name
+JavaScript uses this as a special keyword, not a method parameter.
 
-    def bark(self):
-        print(self.name, "says woof")
+Both can access the current object's properties.
 
-dog = Dog("Bruno")
-dog.bark()
-
-
-JAVASCRIPT:
-
-class Dog {
-    constructor(name) {
-        this.name = name;
-    }
-
-    bark() {
-        console.log(this.name, "says woof");
-    }
-}
-
-const dog = new Dog("Bruno");
-dog.bark();
-
-
-Both output:
-Bruno says woof
-
-
-IMPORTANT DIFFERENCES:
-
-1. Python explicitly writes self as the first instance-method parameter.
-2. JavaScript uses this, which is a special keyword, not a parameter.
-3. Python automatically binds self when an instance method is accessed.
-4. JavaScript this generally depends on how the function is called.
-
-Example JavaScript binding issue:
-
-const sayBark = dog.bark;
-// sayBark(); // In strict mode, this is undefined and this.name fails.
-
-Preserve the binding:
-
-const safeBark = dog.bark.bind(dog);
-safeBark();
+However, JavaScript this generally depends on how the function is called.
+A detached method can lose its original this binding.
 */
 
 
 // ------------------------------------------------------------
-// C. INSTANCE PROPERTIES AND METHODS
-// ------------------------------------------------------------
-
-/*
-PYTHON:
-
-class Counter:
-    def __init__(self):
-        self.count = 0
-
-    def increment(self):
-        self.count += 1
-
-counter = Counter()
-counter.increment()
-print(counter.count)  # 1
-
-
-JAVASCRIPT:
-
-class Counter {
-    constructor() {
-        this.count = 0;
-    }
-
-    increment() {
-        this.count += 1;
-    }
-}
-
-const counter = new Counter();
-counter.increment();
-console.log(counter.count); // 1
-*/
-
-
-// ------------------------------------------------------------
-// D. INHERITANCE AND PARENT CONSTRUCTOR
+// C. INHERITANCE
 // ------------------------------------------------------------
 
 /*
 PYTHON:
 
 class Animal:
-    def __init__(self, name):
-        self.name = name
-
     def speak(self):
-        print(self.name, "makes a sound")
+        print("Animal sound")
 
 class Dog(Animal):
-    def __init__(self, name, breed):
-        super().__init__(name)
-        self.breed = breed
+    pass
 
-dog = Dog("Bruno", "Labrador")
+dog = Dog()
 dog.speak()
 
 
 JAVASCRIPT:
 
 class Animal {
-    constructor(name) {
-        this.name = name;
-    }
-
     speak() {
-        console.log(this.name, "makes a sound");
+        console.log("Animal sound");
     }
 }
 
-class Dog extends Animal {
-    constructor(name, breed) {
-        super(name);
-        this.breed = breed;
-    }
-}
+class Dog extends Animal {}
 
-const dog = new Dog("Bruno", "Labrador");
+const dog = new Dog();
 dog.speak();
 
 
-COMPARISON:
-
-Python:
+Python inheritance:
 class Dog(Animal)
 
-JavaScript:
+JavaScript inheritance:
 class Dog extends Animal
-
-Python parent constructor:
-super().__init__(name)
-
-JavaScript parent constructor:
-super(name)
 */
 
 
 // ------------------------------------------------------------
-// E. METHOD OVERRIDING
+// D. PARENT CONSTRUCTOR
 // ------------------------------------------------------------
 
 /*
 PYTHON:
 
-class Animal:
-    def speak(self):
-        print("Some sound")
-
-class Cat(Animal):
-    def speak(self):
-        print("Meow")
-
-Cat().speak()
+class Child(Parent):
+    def __init__(self, name):
+        super().__init__(name)
 
 
 JAVASCRIPT:
 
-class Animal {
-    speak() {
-        console.log("Some sound");
+class Child extends Parent {
+    constructor(name) {
+        super(name);
     }
 }
-
-class Cat extends Animal {
-    speak() {
-        console.log("Meow");
-    }
-}
-
-new Cat().speak();
-
-Both allow a child class to replace an inherited method implementation.
 */
 
 
 // ------------------------------------------------------------
-// F. STATIC METHODS
+// E. STATIC METHODS
 // ------------------------------------------------------------
 
 /*
@@ -864,8 +752,6 @@ class MathHelper:
     def add(a, b):
         return a + b
 
-print(MathHelper.add(2, 3))
-
 
 JAVASCRIPT:
 
@@ -874,285 +760,111 @@ class MathHelper {
         return a + b;
     }
 }
-
-console.log(MathHelper.add(2, 3));
-
-Python uses @staticmethod.
-JavaScript uses the static keyword.
 */
 
 
 // ------------------------------------------------------------
-// G. GETTERS AND SETTERS
+// F. PRIVATE DATA
 // ------------------------------------------------------------
 
 /*
-PYTHON:
+Python:
+_balance is a naming convention for internal data.
+It does not enforce strict privacy.
 
-class Person:
-    def __init__(self, age):
-        self._age = age
-
-    @property
-    def age(self):
-        return self._age
-
-    @age.setter
-    def age(self, value):
-        if value < 0:
-            raise ValueError("Age cannot be negative")
-        self._age = value
-
-person = Person(20)
-print(person.age)
-person.age = 21
-
-
-JAVASCRIPT:
-
-class Person {
-    constructor(age) {
-        this.age = age;
-    }
-
-    get age() {
-        return this._age;
-    }
-
-    set age(value) {
-        if (value < 0) {
-            throw new Error("Age cannot be negative");
-        }
-        this._age = value;
-    }
-}
-
-const person = new Person(20);
-console.log(person.age);
-person.age = 21;
-
-Both support property-like access with validation.
-*/
-
-
-// ------------------------------------------------------------
-// H. ENCAPSULATION AND PRIVATE DATA
-// ------------------------------------------------------------
-
-/*
-PYTHON:
-
-A leading underscore, such as self._balance, conventionally marks
-an internal attribute. It does not enforce strict privacy.
-
-JAVASCRIPT:
-
-class Wallet {
-    #balance = 0;
-
-    add(amount) {
-        if (amount > 0) {
-            this.#balance += amount;
-        }
-    }
-
-    getBalance() {
-        return this.#balance;
-    }
-}
-
-const wallet = new Wallet();
-wallet.add(50);
-console.log(wallet.getBalance());
-
-JavaScript #private fields are enforced by the language and cannot
-be accessed directly outside their declaring class.
-*/
-
-
-// ------------------------------------------------------------
-// I. CLASS PROPERTIES VS INSTANCE PROPERTIES
-// ------------------------------------------------------------
-
-/*
-PYTHON:
-
-class Example:
-    category = "demo"  # Class attribute
-
-    def __init__(self, name):
-        self.name = name  # Instance attribute
-
-
-JAVASCRIPT:
-
-class Example {
-    static category = "demo";
-
-    constructor(name) {
-        this.name = name;
-    }
-}
-
-Python class attributes and JavaScript static properties are related
-ideas, but their lookup and inheritance rules are not identical.
-*/
-
-
-// ------------------------------------------------------------
-// J. QUICK COMPARISON TABLE
-// ------------------------------------------------------------
-
-/*
-Concept                  Python                  JavaScript
-
-Class                    class Student:          class Student {}
-Initializer              __init__()              constructor()
-Instance reference       self                    this
-Create instance          Student("Rahul")        new Student("Rahul")
-Inheritance              class Dog(Animal)       class Dog extends Animal
-Parent constructor       super().__init__(...)   super(...)
-Static method            @staticmethod           static methodName()
-Getter                   @property               get propertyName()
-Setter                   @propertyName.setter    set propertyName()
-Private field            _name is convention     #name is private field
-Print output             print(value)             console.log(value)
-
-These are conceptual comparisons. Python and JavaScript have different
-object models, so their features are not always exact equivalents.
+JavaScript:
+#balance is a private field enforced by the language.
 */
 
 
 // ============================================================
-// 17. QUICK REVISION
+// 14. QUICK REVISION
 // ============================================================
 
 /*
-CLASS:
-Blueprint for creating instances.
-
 OBJECT:
-A value grouping related properties and methods.
+Contains state and behaviour.
 
-INSTANCE:
-An object created from a class.
+PROTOTYPE:
+Object used in property/method lookup through the prototype chain.
 
-CONSTRUCTOR:
-Initializes a new instance.
+__proto__:
+Legacy accessor for an object's prototype.
 
-PROPERTY:
-Data stored on an object.
+CLASS:
+Template for creating objects.
 
-METHOD:
-Function associated with a class or object.
+constructor():
+Initializes an object when using new.
 
-THIS:
-In these regular method calls, refers to the current instance.
+new:
+Creates an instance of a class.
 
-NEW:
-Creates an instance from a class.
+this:
+Refers to the current object in these method calls.
 
-STATIC:
-Member accessed on the class itself.
+extends:
+Establishes inheritance from a parent class.
 
-GETTER:
-Reads a value with property-like syntax.
+METHOD OVERRIDING:
+Child class provides its own implementation of a parent method.
 
-SETTER:
-Assigns a value, potentially with validation.
+super():
+Calls the parent constructor.
 
-INHERITANCE:
-Child class reuses or specializes a parent using extends.
+super.methodName():
+Calls a parent method.
 
-SUPER:
-Calls the parent constructor or accesses parent methods.
+try:
+Runs code that may throw an error.
 
-OVERRIDING:
-Child provides its own implementation of a parent method.
+catch(err):
+Handles an error thrown in the try block.
 
-ENCAPSULATION:
-Controls access to internal state.
+instanceof:
+Checks an object's class/prototype relationship.
 
-COMPOSITION:
-Builds an object using other objects.
+Object.hasOwn():
+Checks whether a property belongs directly to an object.
 */
 
 
 // ============================================================
-// 18. PRACTICE EXERCISES
+// 15. PRACTICE QUESTIONS
 // ============================================================
 
 /*
-EXERCISE 1:
-Create an Employee class with:
-- name and salary properties
-- showDetails() method
-Create two employee instances and print their details.
+1. Create a User class with name and email.
+   Add a viewData() method.
 
+2. Create an Admin class extending User.
+   Add an editData() method.
 
-EXERCISE 2:
-Create a Rectangle class with width and height.
-Add getArea() that returns width * height.
+3. Override viewData() in Admin.
+   Make it display "Admin can view all data."
 
+4. In the overridden method, call the parent's viewData() using
+   super.viewData().
 
-EXERCISE 3:
-Create a Counter class:
-- count starts at 0
-- increment()
-- decrement()
-- showCount()
+5. Create a Student class with name and age.
+   Add a birthday() method that increments age.
 
+6. Create a prototype object with a greet() method.
+   Link another object to it using Object.create().
+   Call greet() on the new object.
 
-EXERCISE 4:
-Create SavingsAccount extending BankAccount.
-Add interestRate and a method calculating:
-interest = balance * interestRate / 100
+7. Use try...catch to handle an invalid age.
 
-
-EXERCISE 5:
-Create a Product class with a private #price field.
-Add a getter and setter that reject negative prices.
-
-
-EXERCISE 6:
-Explain:
-- Class vs object
-- Property vs method
-- Instance method vs static method
-- Inheritance vs composition
-- Copying a primitive vs copying an object reference
+8. Explain the difference between:
+   - A class and an object
+   - An own method and an inherited method
+   - extends and super
+   - try and catch
 */
 
 
 // ============================================================
-// 19. PYTHON VS JAVASCRIPT OOP — SELF-TEST
+// END OF JS11 REVISION FILE
 // ============================================================
 
-/*
-Try answering without looking at the comparison section.
-
-1. What is the JavaScript equivalent of Python's __init__()?
-2. What is similar about Python self and JavaScript this?
-3. Why can JavaScript this behave differently if a method is detached?
-4. How do you inherit from Animal in Python? How in JavaScript?
-5. What does super() do in a child-class constructor?
-6. Difference between Python's _balance and JavaScript's #balance?
-7. How do you declare a static method in each language?
-8. How is object creation different in Python and JavaScript?
-
-ANSWERS:
-
-1. constructor()
-2. Both let instance methods access the current object's data.
-3. JavaScript this generally depends on how the function is called.
-4. Python: class Dog(Animal)
-   JavaScript: class Dog extends Animal
-5. Calls the parent constructor or accesses parent methods.
-6. Python underscore is convention; JavaScript # fields are private.
-7. Python: @staticmethod
-   JavaScript: static methodName() {}
-8. Python: Student(...)
-   JavaScript: new Student(...)
-*/
-
-console.log("\nRevision file executed successfully.");
+console.log("\nJS11 revision file executed successfully.");
